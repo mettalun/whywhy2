@@ -1,0 +1,33 @@
+{
+  "name": "なぜなぜ分析 教育システム",
+  "short_name": "なぜなぜ分析",
+  "description": "なぜなぜ分析の入力、保存、印刷、評価を行える教育システムです。",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#fffaf5",
+  "theme_color": "#f6c7d4",
+  "lang": "ja",
+  "icons": [
+    {
+      "src": "./image/icom64.png",
+      "sizes": "64x64",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./image/icom256.png",
+      "sizes": "256x256",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./image/icom512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "productivity"]
+}

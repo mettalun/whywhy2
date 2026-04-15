@@ -1,0 +1,627 @@
+:root {
+  --bg: #fffaf5;
+  --surface: rgba(255, 255, 255, 0.9);
+  --text: #2f2b2b;
+  --border: #c9bdb7;
+  --shadow: 0 16px 40px rgba(96, 76, 60, 0.12);
+  --problem: #f6c7d4;
+  --why: #fff2cf;
+  --countermeasure: #cfe7ff;
+  --button: #f3ede6;
+  --button-text: #4c3f39;
+  --button-danger: #d94b45;
+  --button-danger-text: #fff8f5;
+  --canvas-grid: rgba(120, 102, 89, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  font-family: "Yu Gothic UI", "Hiragino Kaku Gothic ProN", sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(246, 199, 212, 0.55), transparent 28%),
+    linear-gradient(180deg, #fffdf9 0%, var(--bg) 100%);
+  color: var(--text);
+}
+
+body {
+  min-height: 100vh;
+}
+
+button,
+textarea {
+  font: inherit;
+}
+
+.app-shell {
+  min-height: 100vh;
+}
+
+#print-root {
+  display: none;
+  background: white;
+  color: var(--text);
+}
+
+body.print-mode #print-root {
+  display: block;
+}
+
+.print-sheet {
+  padding: 0;
+  margin: 0;
+}
+
+.print-page {
+  position: relative;
+  width: 100%;
+  break-after: page;
+  page-break-after: always;
+  break-inside: avoid;
+  page-break-inside: avoid;
+  padding: 0;
+  margin: 0;
+  overflow: visible;
+}
+
+.print-page:last-child {
+  break-after: auto;
+  page-break-after: auto;
+}
+
+.print-title {
+  margin: 0;
+  font-size: 20px;
+}
+
+.print-header {
+  width: 100%;
+}
+
+.print-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  min-height: 40px;
+  margin: 0 0 16px;
+}
+
+.print-page-number {
+  margin: 0;
+  font-size: 14px;
+  color: #6c5b50;
+}
+
+.print-page-inner {
+  position: relative;
+  width: 100%;
+  margin: 0;
+  overflow: visible;
+}
+
+.print-scene {
+  position: relative;
+  overflow: hidden;
+  max-width: none;
+}
+
+.print-page-zoom {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: visible;
+}
+
+.print-stage {
+  position: relative;
+}
+
+.print-svg {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+}
+
+.print-node {
+  position: absolute;
+  border: 1px solid rgba(88, 71, 60, 0.24);
+  border-radius: 20px;
+  padding: 8px 12px 10px;
+  line-height: 1.35;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  break-inside: avoid;
+  page-break-inside: avoid;
+  box-shadow: none;
+}
+
+.print-node-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #5a4a41;
+}
+
+.print-node-body {
+  width: 100%;
+  min-height: 1em;
+}
+
+.print-row {
+  position: absolute;
+  left: 0;
+  right: 0;
+  break-inside: avoid;
+  page-break-inside: avoid;
+  pointer-events: none;
+}
+
+.print-page-nodes {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+}
+
+.node-box {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.action-button {
+  cursor: pointer;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--button);
+  color: var(--button-text);
+  padding: 0.7rem 1.1rem;
+  box-shadow: 0 8px 20px rgba(96, 76, 60, 0.08);
+}
+
+.action-button-danger {
+  border-color: rgba(153, 38, 35, 0.22);
+  background: linear-gradient(180deg, #eb6c65 0%, var(--button-danger) 100%);
+  color: var(--button-danger-text);
+}
+
+.action-button-danger:hover,
+.action-button-danger:focus-visible {
+  filter: brightness(1.03);
+}
+
+.action-button-blink {
+  animation: action-button-blink 5s ease-in-out infinite;
+}
+
+.action-button-blink:hover,
+.action-button-blink:focus-visible {
+  animation-play-state: paused;
+}
+
+.action-button:disabled {
+  opacity: 0.8;
+  cursor: not-allowed;
+}
+
+@keyframes action-button-blink {
+  0%,
+  100% {
+    opacity: 1;
+    filter: brightness(1);
+    box-shadow: 0 8px 20px rgba(96, 76, 60, 0.08);
+  }
+
+  50% {
+    opacity: 0.45;
+    filter: brightness(1.08);
+    box-shadow: 0 10px 24px rgba(96, 76, 60, 0.14);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .action-button-blink {
+    animation: none;
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.education-screen {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.education-card {
+  width: min(100%, 980px);
+  padding: 32px 28px;
+  border: 1px solid rgba(201, 189, 183, 0.8);
+  border-radius: 32px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.education-card-start {
+  width: min(100%, 520px);
+  text-align: center;
+  padding: 44px 28px;
+}
+
+.education-password-form {
+  display: grid;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.education-password-input {
+  width: 100%;
+  padding: 0.95rem 1rem;
+  border: 1px solid rgba(201, 189, 183, 0.9);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.96);
+  color: var(--text);
+  text-align: center;
+  font-size: 1.05rem;
+  letter-spacing: 0.08em;
+}
+
+.education-password-input:focus {
+  outline: 2px solid rgba(217, 75, 69, 0.24);
+  outline-offset: 2px;
+}
+
+.education-error-message {
+  margin: 0;
+  color: #b6423d;
+  font-size: 0.95rem;
+}
+
+.education-hero-icon {
+  width: min(180px, 42vw);
+  max-width: 180px;
+  height: auto;
+  border-radius: 28px;
+  box-shadow: 0 20px 40px rgba(96, 76, 60, 0.16);
+}
+
+.education-card h1,
+.education-card h2,
+.education-card h3 {
+  margin: 0;
+}
+
+.education-card-start h1 {
+  margin-top: 10px;
+  font-size: clamp(2rem, 5vw, 2.8rem);
+}
+
+.education-subtitle {
+  margin: 18px 0 0;
+  color: #7d695e;
+  letter-spacing: 0.08em;
+}
+
+.education-primary-button {
+  min-width: 220px;
+  margin-top: 28px;
+}
+
+.education-action-row {
+  display: flex;
+  justify-content: center;
+}
+
+.education-card-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.education-card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+}
+
+.education-lead {
+  margin: 0;
+  line-height: 1.9;
+}
+
+.education-rules {
+  display: grid;
+  gap: 18px;
+  margin-top: 24px;
+}
+
+.education-rule-section {
+  padding: 18px 20px;
+  border: 1px solid rgba(201, 189, 183, 0.7);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.68);
+}
+
+.education-rule-section h3 {
+  margin-bottom: 10px;
+  color: #7d695e;
+}
+
+.education-rule-section ul,
+.evaluation-side-card ul {
+  margin: 0;
+  padding-left: 1.2rem;
+  line-height: 1.8;
+}
+
+.evaluation-overview {
+  display: grid;
+  gap: 18px;
+  margin-top: 8px;
+}
+
+.evaluation-overall {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+  border-radius: 22px;
+  background: rgba(255, 250, 245, 0.82);
+  border: 1px solid rgba(201, 189, 183, 0.7);
+}
+
+.evaluation-overall-label {
+  color: #7d695e;
+  font-weight: 700;
+}
+
+.evaluation-overall-grade {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #fff;
+  color: #8d3f2d;
+  font-size: 1.8rem;
+  font-weight: 700;
+  border: 2px solid rgba(217, 75, 69, 0.22);
+}
+
+.evaluation-summary-block,
+.evaluation-side-card,
+.evaluation-row {
+  padding: 18px 20px;
+  border: 1px solid rgba(201, 189, 183, 0.7);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.evaluation-summary-block p,
+.evaluation-row dd {
+  margin: 8px 0 0;
+  line-height: 1.8;
+}
+
+.evaluation-list-grid,
+.evaluation-table {
+  display: grid;
+  gap: 16px;
+  margin-top: 22px;
+}
+
+.evaluation-details {
+  margin-top: 28px;
+}
+
+.evaluation-details h2,
+.evaluation-side-card h2,
+.evaluation-summary-block h2 {
+  font-size: 1.1rem;
+  color: #6c5b50;
+}
+
+.evaluation-row-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.evaluation-item-meta {
+  color: #7d695e;
+  font-size: 0.92rem;
+}
+
+.evaluation-row-heading h3 {
+  margin-top: 6px;
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+
+.evaluation-rating-badge {
+  flex: 0 0 auto;
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  border: 1px solid rgba(125, 105, 94, 0.2);
+  background: #f3ede6;
+}
+
+.evaluation-rating-badge[data-rating="適合"] {
+  background: #e4f4df;
+  color: #2c6c33;
+}
+
+.evaluation-rating-badge[data-rating="一部適合"] {
+  background: #fff2cf;
+  color: #8a6428;
+}
+
+.evaluation-rating-badge[data-rating="不適合"] {
+  background: #fde1de;
+  color: #9e3f37;
+}
+
+.evaluation-rating-badge[data-rating="評価不能"] {
+  background: #ece8e3;
+  color: #6d625a;
+}
+
+.evaluation-row-body {
+  display: grid;
+  gap: 14px;
+  margin: 16px 0 0;
+}
+
+.evaluation-row-body dt {
+  color: #7d695e;
+  font-weight: 700;
+}
+
+.evaluation-footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 28px;
+}
+
+@media (min-width: 760px) {
+  .evaluation-overview {
+    grid-template-columns: 220px minmax(0, 1fr);
+    align-items: stretch;
+  }
+
+  .evaluation-list-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 759px) {
+  .education-screen {
+    padding: 16px;
+  }
+
+  .education-card {
+    padding: 24px 18px;
+    border-radius: 24px;
+  }
+
+  .evaluation-row-heading {
+    flex-direction: column;
+  }
+}
+
+@media print {
+  @page {
+    size: 420mm 297mm;
+    margin: 4mm;
+  }
+
+  html,
+  body {
+    background: white !important;
+  }
+
+  body.print-mode > :not(#print-root) {
+    display: none !important;
+  }
+
+  #print-root,
+  #print-root * {
+    visibility: visible;
+  }
+
+  #print-root {
+    display: block !important;
+    position: static;
+    width: 100%;
+    padding: 0;
+    background: white;
+    overflow: visible;
+  }
+
+  .print-sheet {
+    display: block;
+    overflow: visible;
+  }
+
+  .print-row,
+  .print-node,
+  .node-box {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .print-page-canvas {
+    position: relative;
+    overflow: hidden;
+    max-width: none;
+  }
+
+  .print-page-zoom {
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow: visible;
+  }
+
+  .print-page-lines {
+    position: absolute;
+    left: 0;
+    top: 0;
+    pointer-events: none;
+    overflow: visible;
+  }
+
+  .print-page,
+  .print-page-inner,
+  .print-scene,
+  .print-stage,
+  .print-node,
+  .print-svg,
+  .print-title,
+  .print-page-header,
+  .print-page-number,
+  .print-row,
+  .node-box {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .print-page {
+    width: calc(420mm - 8mm);
+    min-height: calc(297mm - 8mm);
+    break-after: page;
+    page-break-after: always;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    overflow: hidden;
+  }
+
+  .print-page:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
+}

@@ -1,0 +1,103 @@
+{
+  "app": "whywhy-sheet",
+  "version": "3.0.0",
+  "rootId": "node-1",
+  "nodes": [
+    {
+      "id": "node-1",
+      "type": "problem",
+      "level": 0,
+      "text": "完成品を運ぶ搬送コンベアが停止した",
+      "parentId": null,
+      "nextId": "node-2",
+      "children": [],
+      "measuredHeight": 69,
+      "x": 48,
+      "y": 88
+    },
+    {
+      "id": "node-2",
+      "type": "why",
+      "level": 1,
+      "text": "モーターへの電源供給が止まった",
+      "parentId": "node-1",
+      "nextId": "node-3",
+      "children": [],
+      "measuredHeight": 69,
+      "x": 388,
+      "y": 88
+    },
+    {
+      "id": "node-3",
+      "type": "why",
+      "level": 2,
+      "text": "ヒューズが溶断した",
+      "parentId": "node-2",
+      "nextId": "node-4",
+      "children": [],
+      "measuredHeight": 69,
+      "x": 728,
+      "y": 88
+    },
+    {
+      "id": "node-4",
+      "type": "why",
+      "level": 3,
+      "text": "モーターに過電流が流れた",
+      "parentId": "node-3",
+      "nextId": "node-5",
+      "children": [],
+      "measuredHeight": 69,
+      "x": 1068,
+      "y": 88
+    },
+    {
+      "id": "node-5",
+      "type": "why",
+      "level": 4,
+      "text": "搬送ローラーの回転抵抗が増加した",
+      "parentId": "node-4",
+      "nextId": "node-6",
+      "children": [],
+      "measuredHeight": 69,
+      "x": 1408,
+      "y": 88
+    },
+    {
+      "id": "node-6",
+      "type": "why",
+      "level": 5,
+      "text": "軸受の潤滑油が不足していた",
+      "parentId": "node-5",
+      "nextId": "node-7",
+      "children": [],
+      "measuredHeight": 69,
+      "x": 1748,
+      "y": 88
+    },
+    {
+      "id": "node-7",
+      "type": "why",
+      "level": 6,
+      "text": "定期給油の実施が漏れていた",
+      "parentId": "node-6",
+      "nextId": "node-8",
+      "children": [],
+      "measuredHeight": 69,
+      "x": 2088,
+      "y": 88
+    },
+    {
+      "id": "node-8",
+      "type": "countermeasure",
+      "level": 7,
+      "text": "給油点検表を見直し、軸受給油項目を追加する",
+      "parentId": "node-7",
+      "nextId": null,
+      "children": [],
+      "measuredHeight": 92,
+      "x": 2428,
+      "y": 88
+    }
+  ]
+}
