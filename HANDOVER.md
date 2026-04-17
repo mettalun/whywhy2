@@ -91,7 +91,7 @@ WhyWhy Sheet に「評価」機能と評価結果ページを追加
 を確定する必要がある
 - GitHub Pages は静的配信のみのため、`server.js` は同居できない
 - そのため評価 API は別ホストで公開する前提になる
-- 現時点の方針は `https://api.rq-inn.com/whywhy2/api/whywhy/evaluate` を評価 API の公開先として使う構成
+- 現時点の方針は、フロントを `https://mettalun.github.io/whywhy2/` で公開し、評価 API は `https://api.rq-inn.com/whywhy2/api/whywhy/evaluate` を使う構成
 
 2. `server.js` の公開方法整理
 - 現在は `0.0.0.0:3001` で待ち受ける実装
@@ -112,6 +112,7 @@ WhyWhy Sheet に「評価」機能と評価結果ページを追加
 のどちらかへ寄せるのが望ましい
 - GitHub Pages 配下では同一オリジンに Node API を置けないため、実質的には「固定の HTTPS API ベース URL に統一」が有力
 - 現在のフロントは HTTPS 配下では `https://api.rq-inn.com/whywhy2/api/whywhy/evaluate` を優先して呼ぶ実装
+- つまり GitHub Pages 側の公開 URL を `https://mettalun.github.io/whywhy2/` にしても、評価通信は `api.rq-inn.com` 側へ送る
 
 4. OpenAI API キー運用整理
 - 会話内で一度キー共有が行われた

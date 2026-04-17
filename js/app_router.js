@@ -154,7 +154,7 @@ export class AppRouter {
     `;
 
     this.rootElement.querySelector('[data-action="begin"]').addEventListener("click", () => {
-      downloadTextFile(JSON.stringify(PRESENTATION_TEST_DATA, null, 2), "test-data.js", "application/json");
+      downloadTextFile(JSON.stringify(PRESENTATION_TEST_DATA, null, 2), "test-data.json", "application/json");
       this.serializedTree = null;
       this.evaluationResult = null;
       this.currentScreen = "analysis";

@@ -81,15 +81,23 @@ export function promptJsonFile() {
         window.clearTimeout(focusTimerId);
       }
 
-      // Some browsers restore focus before the file input change event fires.
-      // Give the picker a short grace period so a valid selection is not
-      // mistaken for cancellation.
+      // Mobile browsers, especially iOS Safari, can take noticeably longer
+      // to dispatch the change event after the picker closes.
       focusTimerId = window.setTimeout(() => {
-        if (!settled && !changeHandled && (!input.files || input.files.length === 0)) {
+        if (
+          !settled &&
+          !changeHandled &&
+          document.visibilityState === "visible" &&
+          (!input.files || input.files.length === 0)
+        ) {
           finish(() => resolve(null));
         }
-      }, 300);
+      }, 1500);
     };
+
+    input.addEventListener("cancel", () => {
+      finish(() => resolve(null));
+    });
 
     input.addEventListener("change", async () => {
       changeHandled = true;

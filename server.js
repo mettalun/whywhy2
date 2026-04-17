@@ -5,8 +5,55 @@ const { URL } = require("url");
 
 const HOST = "0.0.0.0";
 const PORT = Number.parseInt(process.env.PORT || "3001", 10);
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
-const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-4.1-mini";
+const ENV_FILE_CANDIDATES = [
+  path.resolve(__dirname, ".env"),
+  path.resolve(__dirname, "..", ".env"),
+  path.resolve(__dirname, "..", "..", ".env"),
+  path.resolve(__dirname, "..", "..", "api", ".env")
+];
+
+function readEnvValue(key) {
+  for (const envFilePath of ENV_FILE_CANDIDATES) {
+    try {
+      const envText = fs.readFileSync(envFilePath, "utf8");
+      const lines = envText.split(/\r?\n/);
+
+      for (const line of lines) {
+        if (!line || line.startsWith("#")) {
+          continue;
+        }
+
+        const separatorIndex = line.indexOf("=");
+        if (separatorIndex <= 0) {
+          continue;
+        }
+
+        const parsedKey = line.slice(0, separatorIndex).trim();
+        if (parsedKey !== key) {
+          continue;
+        }
+
+        return line.slice(separatorIndex + 1).trim();
+      }
+    } catch (_error) {
+      // Ignore missing env files and keep searching parent candidates.
+    }
+  }
+
+  return "";
+}
+
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY || readEnvValue("OPENAI_API_KEY");
+const OPENAI_MODEL = process.env.OPENAI_MODEL || readEnvValue("OPENAI_MODEL") || "gpt-4.1-mini";
+const DEFAULT_ALLOWED_ORIGINS = [
+  "https://mettalun.github.io"
+];
+const ALLOWED_ORIGINS = new Set(
+  (process.env.ALLOWED_ORIGINS || DEFAULT_ALLOWED_ORIGINS.join(","))
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean)
+);
 const ALLOWED_RATINGS = new Set(["適合", "一部適合", "不適合", "評価不能"]);
 const ALLOWED_OVERALL_RATINGS = new Set(["A", "B", "C", "D"]);
 const EXPECTED_ITEM_IDS = [
@@ -427,7 +474,6 @@ async function callOpenAI(analysisText) {
     },
     body: JSON.stringify({
       model: OPENAI_MODEL,
-      temperature: 0.1,
       input: [
         {
           role: "system",
@@ -470,13 +516,37 @@ async function callOpenAI(analysisText) {
   };
 }
 
-function sendJson(response, statusCode, payload) {
+function getAllowedOrigin(request) {
+  const origin = request.headers.origin;
+
+  if (!origin) {
+    return "";
+  }
+
+  return ALLOWED_ORIGINS.has(origin) ? origin : "";
+}
+
+function createCorsHeaders(request) {
+  const allowedOrigin = getAllowedOrigin(request);
+  const headers = {
+    "access-control-allow-methods": "GET, POST, OPTIONS",
+    "access-control-allow-headers": "Content-Type, Authorization",
+    "access-control-max-age": "86400",
+    vary: "Origin"
+  };
+
+  if (allowedOrigin) {
+    headers["access-control-allow-origin"] = allowedOrigin;
+  }
+
+  return headers;
+}
+
+function sendJson(request, response, statusCode, payload) {
   response.writeHead(statusCode, {
     "content-type": "application/json; charset=utf-8",
     "cache-control": "no-store",
-    "access-control-allow-origin": "*",
-    "access-control-allow-methods": "GET, POST, OPTIONS",
-    "access-control-allow-headers": "Content-Type, Authorization"
+    ...createCorsHeaders(request)
   });
   response.end(JSON.stringify(payload));
 }
@@ -506,7 +576,7 @@ async function handleEvaluationApi(request, response) {
     const analysisText = String(payload.analysisText || "").trim();
 
     if (!analysisText) {
-      sendJson(response, 400, {
+      sendJson(request, response, 400, {
         error: "analysisText が空です。"
       });
       return;
@@ -514,10 +584,10 @@ async function handleEvaluationApi(request, response) {
 
     const result = await callOpenAI(analysisText);
     rawResponseText = result.rawResponseText;
-    sendJson(response, 200, result);
+    sendJson(request, response, 200, result);
   } catch (error) {
     const statusCode = error.statusCode && Number.isInteger(error.statusCode) ? error.statusCode : 500;
-    sendJson(response, statusCode, {
+    sendJson(request, response, statusCode, {
       error: error.message || "評価APIでエラーが発生しました。",
       rawResponseText: error.rawResponseText || rawResponseText,
       extractedJsonText: error.extractedJsonText || ""
@@ -535,7 +605,7 @@ function serveStaticFile(urlPathname, response) {
   const filePath = resolveStaticPath(urlPathname);
 
   if (!filePath.startsWith(__dirname)) {
-    sendJson(response, 403, { error: "アクセスできません。" });
+    sendJson(response.req, response, 403, { error: "アクセスできません。" });
     return;
   }
 
@@ -561,22 +631,40 @@ function serveStaticFile(urlPathname, response) {
     });
 }
 
+function normalizeApiPath(urlPathname) {
+  if (urlPathname.startsWith("/whywhy2/api/")) {
+    return urlPathname.slice("/whywhy2".length);
+  }
+
+  return urlPathname;
+}
+
+function normalizeStaticPath(urlPathname) {
+  if (urlPathname === "/whywhy2" || urlPathname === "/whywhy2/") {
+    return "/";
+  }
+
+  if (urlPathname.startsWith("/whywhy2/")) {
+    return urlPathname.slice("/whywhy2".length);
+  }
+
+  return urlPathname;
+}
+
 const server = http.createServer(async (request, response) => {
   const requestUrl = new URL(request.url, `http://${request.headers.host || `127.0.0.1:${PORT}`}`);
+  const normalizedApiPath = normalizeApiPath(requestUrl.pathname);
 
-  if (request.method === "OPTIONS" && requestUrl.pathname.startsWith("/api/")) {
+  if (request.method === "OPTIONS" && normalizedApiPath.startsWith("/api/")) {
     response.writeHead(204, {
-      "access-control-allow-origin": "*",
-      "access-control-allow-methods": "GET, POST, OPTIONS",
-      "access-control-allow-headers": "Content-Type, Authorization",
-      "access-control-max-age": "86400"
+      ...createCorsHeaders(request)
     });
     response.end();
     return;
   }
 
-  if (request.method === "GET" && requestUrl.pathname === "/api/health") {
-    sendJson(response, 200, {
+  if (request.method === "GET" && normalizedApiPath === "/api/health") {
+    sendJson(request, response, 200, {
       ok: true,
       model: OPENAI_MODEL,
       hasOpenAiKey: Boolean(OPENAI_API_KEY)
@@ -584,17 +672,17 @@ const server = http.createServer(async (request, response) => {
     return;
   }
 
-  if (request.method === "POST" && requestUrl.pathname === "/api/whywhy/evaluate") {
+  if (request.method === "POST" && normalizedApiPath === "/api/whywhy/evaluate") {
     await handleEvaluationApi(request, response);
     return;
   }
 
   if (request.method !== "GET" && request.method !== "HEAD") {
-    sendJson(response, 405, { error: "Method Not Allowed" });
+    sendJson(request, response, 405, { error: "Method Not Allowed" });
     return;
   }
 
-  serveStaticFile(requestUrl.pathname, response);
+  serveStaticFile(normalizeStaticPath(requestUrl.pathname), response);
 });
 
 server.listen(PORT, HOST, () => {
